@@ -484,11 +484,11 @@
     let allVacancies = [];
     let selectedVacancy = '';
 
-    // Надёжный универсальный извлекатель данных (работает с объектами и массивами любого порядка)
+    // Универсальный парсер атрибутов (поддерживает ключи объектов и индексы массивов)
     function getAttr(v, keys, indices) {
       if (!v) return '';
       
-      // Если пришел объект (словарь по ключам колонок)
+      // Если это объект (ключи из заголовков таблицы)
       if (typeof v === 'object' && !Array.isArray(v)) {
         for (let k of keys) {
           for (let col in v) {
@@ -502,25 +502,24 @@
         }
       }
       
-      // Если пришел массив (строка из таблицы по индексам)
-      if (Array.isArray(v)) {
-        if (indices) {
-          for (let idx of indices) {
-            if (v[idx] !== undefined && v[idx] !== null) {
-              let val = String(v[idx]).trim();
-              if (val !== '' && val !== 'Активна' && !val.startsWith('VAC-')) {
-                return val;
-              }
+      // Если это массив (строка таблицы по индексам)
+      let arr = Array.isArray(v) ? v : (v.rawArray || []);
+      if (indices) {
+        for (let idx of indices) {
+          if (arr[idx] !== undefined && arr[idx] !== null) {
+            let val = String(arr[idx]).trim();
+            if (val !== '' && val !== 'Активна' && !val.startsWith('VAC-')) {
+              return val;
             }
           }
         }
-        // Поиск по ключевым словам внутри элементов массива
-        for (let item of v) {
-          if (item != null) {
-            let s = String(item).trim();
-            if (keys.some(k => s.toLowerCase().includes(k.toLowerCase()))) {
-              return s;
-            }
+      }
+      
+      for (let item of arr) {
+        if (item != null) {
+          let s = String(item).trim();
+          if (keys.some(k => s.toLowerCase().includes(k.toLowerCase()))) {
+            return s;
           }
         }
       }
@@ -541,10 +540,10 @@
           rawList = data.vacancies || data.data || data.items || Object.values(data).find(Array.isArray) || [];
         }
         
-        // Фильтруем шапку и пустые строки
+        // Фильтрация
         allVacancies = rawList.filter(v => {
           if (!v) return false;
-          let title = getAttr(v, ['назв', 'title', 'ваканс'], [1]);
+          let title = getAttr(v, ['назва', 'назв', 'title', 'ваканс'], [1]);
           let lower = title.toLowerCase();
           if (!title || lower.includes('назва') || lower.includes('id') || lower.includes('всего вакансий')) {
             return false;
@@ -552,13 +551,8 @@
           return true;
         });
 
-        // Fallback, если список пуст
         if (allVacancies.length === 0 && rawList.length > 0) {
-          allVacancies = rawList.filter(v => {
-            let s = JSON.stringify(v).toLowerCase();
-            return !s.includes('назва вакансії') && !s.includes('категорія') && !s.includes('всего вакансий');
-          });
-          if (allVacancies.length === 0) allVacancies = rawList;
+          allVacancies = rawList;
         }
 
         renderVacancies(allVacancies);
@@ -576,16 +570,17 @@
       }
 
       container.innerHTML = list.map((v, index) => {
-        const title = getAttr(v, ['назв', 'title', 'ваканс'], [1]) || 'Вакансия';
+        const title = getAttr(v, ['назва', 'назв', 'title', 'ваканс'], [1]) || 'Вакансия';
         const client = getAttr(v, ['клиент', 'client', 'компан', 'опис клієнта'], [2]);
         const city = getAttr(v, ['міст', 'город', 'miasto', 'city', 'адрес'], [3]);
+        
         let rate = getAttr(v, ['ставк', 'stawka', 'rate', 'zł'], [4]);
         if (!rate) {
-          // Ищем то, что содержит zł
           let jsonStr = JSON.stringify(v);
           let match = jsonStr.match(/[\d.,]+\s*(?:zł|зл)/i);
           rate = match ? match[0] : 'По договоренности';
         }
+
         const housing = getAttr(v, ['житл', 'прожив', 'zakwaterowanie', 'housing'], [5]);
         const desc = getAttr(v, ['опис', 'описан', 'opis', 'desc', 'обов'], [7]);
 
@@ -613,7 +608,7 @@
     function filterVacancies() {
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
       const filtered = allVacancies.filter(v => {
-        const title = getAttr(v, ['назв', 'title', 'ваканс'], [1]).toLowerCase();
+        const title = getAttr(v, ['назва', 'назв', 'title', 'ваканс'], [1]).toLowerCase();
         const client = getAttr(v, ['клиент', 'client', 'компан', 'опис клієнта'], [2]).toLowerCase();
         const city = getAttr(v, ['міст', 'город', 'miasto', 'city', 'адрес'], [3]).toLowerCase();
         const desc = getAttr(v, ['опис', 'описан', 'opis', 'desc', 'обов'], [7]).toLowerCase();
@@ -625,7 +620,7 @@
     function openDetails(index) {
       const v = allVacancies[index];
       if (!v) return;
-      selectedVacancy = getAttr(v, ['назв', 'title', 'ваканс'], [1]) || 'Вакансия';
+      selectedVacancy = getAttr(v, ['назва', 'назв', 'title', 'ваканс'], [1]) || 'Вакансия';
       
       document.getElementById('detTitle').innerText = selectedVacancy;
       
