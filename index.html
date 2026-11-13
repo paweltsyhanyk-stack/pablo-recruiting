@@ -473,14 +473,23 @@
     let allVacancies = [];
     let selectedVacancy = '';
 
-    // Универсальная функция поиска ключей по ключевым словам (не боится скобок, пробелов и регистра)
-    function getProp(obj, keywords) {
-      if (!obj) return '';
-      for (let key in obj) {
+    // Универсальный поиск: проверяет массив, буквенные колонки (A, B, C...) и текстовые заголовки
+    function getProp(v, keywords, colLetter, arrayIndex) {
+      if (!v) return '';
+      if (Array.isArray(v)) {
+        if (arrayIndex !== undefined && v[arrayIndex] !== undefined && v[arrayIndex] !== null && String(v[arrayIndex]).trim() !== '') {
+          return String(v[arrayIndex]).trim();
+        }
+      }
+      if (colLetter) {
+        if (v[colLetter] !== undefined && v[colLetter] !== null && String(v[colLetter]).trim() !== '') return String(v[colLetter]).trim();
+        if (v[colLetter.toLowerCase()] !== undefined && v[colLetter.toLowerCase()] !== null && String(v[colLetter.toLowerCase()]).trim() !== '') return String(v[colLetter.toLowerCase()]).trim();
+      }
+      for (let key in v) {
         const k = key.toLowerCase();
         for (let word of keywords) {
           if (k.includes(word)) {
-            const val = obj[key];
+            const val = v[key];
             if (val !== undefined && val !== null && String(val).trim() !== '') {
               return String(val).trim();
             }
@@ -512,11 +521,11 @@
       }
 
       container.innerHTML = list.map((v, index) => {
-        const title = getProp(v, ['назв', 'nazwa', 'title', 'ваканс']) || 'Вакансия';
-        const city = getProp(v, ['міст', 'город', 'miasto', 'city']) || 'Польша';
-        const rate = getProp(v, ['ставк', 'stawka', 'rate']) || 'По договоренности';
-        const housing = getProp(v, ['житл', 'прожив', 'zakwaterowanie', 'housing']);
-        const desc = getProp(v, ['опис', 'описан', 'opis', 'desc', 'обов']);
+        const title = getProp(v, ['назв', 'nazwa', 'title', 'ваканс'], 'B', 1) || 'Вакансия';
+        const city = getProp(v, ['міст', 'город', 'miasto', 'city'], 'D', 3) || 'Польша';
+        const rate = getProp(v, ['ставк', 'stawka', 'rate'], 'E', 4) || 'По договоренности';
+        const housing = getProp(v, ['житл', 'прожив', 'zakwaterowanie', 'housing'], 'F', 5);
+        const desc = getProp(v, ['опис', 'описан', 'opis', 'desc', 'обов'], 'H', 7);
 
         return `
           <div class="card" onclick="openDetails(${index})">
@@ -541,9 +550,9 @@
     function filterVacancies() {
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
       const filtered = allVacancies.filter(v => {
-        const title = getProp(v, ['назв', 'nazwa', 'title', 'ваканс']).toLowerCase();
-        const city = getProp(v, ['міст', 'город', 'miasto', 'city']).toLowerCase();
-        const desc = getProp(v, ['опис', 'описан', 'opis', 'desc', 'обов']).toLowerCase();
+        const title = getProp(v, ['назв', 'nazwa', 'title', 'ваканс'], 'B', 1).toLowerCase();
+        const city = getProp(v, ['міст', 'город', 'miasto', 'city'], 'D', 3).toLowerCase();
+        const desc = getProp(v, ['опис', 'описан', 'opis', 'desc', 'обов'], 'H', 7).toLowerCase();
         return title.includes(query) || city.includes(query) || desc.includes(query);
       });
       renderVacancies(filtered);
@@ -552,13 +561,13 @@
     function openDetails(index) {
       const v = allVacancies[index];
       if (!v) return;
-      selectedVacancy = getProp(v, ['назв', 'nazwa', 'title', 'ваканс']) || 'Вакансия';
+      selectedVacancy = getProp(v, ['назв', 'nazwa', 'title', 'ваканс'], 'B', 1) || 'Вакансия';
       
       document.getElementById('detTitle').innerText = selectedVacancy;
-      document.getElementById('detCity').innerText = getProp(v, ['міст', 'город', 'miasto', 'city']) || 'Польша';
-      document.getElementById('detRate').innerText = getProp(v, ['ставк', 'stawka', 'rate']) || 'По договоренности';
+      document.getElementById('detCity').innerText = getProp(v, ['міст', 'город', 'miasto', 'city'], 'D', 3) || 'Польша';
+      document.getElementById('detRate').innerText = getProp(v, ['ставк', 'stawka', 'rate'], 'E', 4) || 'По договоренности';
       
-      const housing = getProp(v, ['житл', 'прожив', 'zakwaterowanie', 'housing']);
+      const housing = getProp(v, ['житл', 'прожив', 'zakwaterowanie', 'housing'], 'F', 5);
       const housingBlock = document.getElementById('detHousingBlock');
       if (housing) {
         document.getElementById('detHousing').innerText = housing;
@@ -567,7 +576,7 @@
         housingBlock.style.display = 'none';
       }
 
-      document.getElementById('detDesc').innerText = getProp(v, ['опис', 'описан', 'opis', 'desc', 'обов']) || 'Описание отсутствует.';
+      document.getElementById('detDesc').innerText = getProp(v, ['опис', 'описан', 'opis', 'desc', 'обов'], 'H', 7) || 'Описание отсутствует.';
       document.getElementById('detailsModal').classList.add('active');
     }
 
@@ -640,9 +649,6 @@
     }
 
     loadVacancies();
-  </script>
-</body>
-</html>
   </script>
 </body>
 </html>
