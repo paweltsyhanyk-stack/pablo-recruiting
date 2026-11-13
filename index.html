@@ -109,7 +109,7 @@
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
       border: 1px solid rgba(0, 0, 0, 0.04);
       cursor: pointer;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      transition: transform 0.15s ease;
     }
 
     .card:active {
@@ -239,21 +239,13 @@
       background: var(--card-bg);
       width: 100%;
       max-width: 520px;
-      max-height: 90vh;
+      max-height: 85vh;
       display: flex;
       flex-direction: column;
       border-radius: 22px 22px 0 0;
       padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
       box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
       animation: slideUp 0.25s ease-out;
-    }
-
-    @media (min-width: 600px) {
-      .modal {
-        border-radius: 20px;
-        padding: 26px;
-        max-height: 85vh;
-      }
     }
 
     @keyframes slideUp {
@@ -270,10 +262,11 @@
     }
 
     .modal-title {
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 700;
       margin: 0;
       letter-spacing: -0.01em;
+      padding-right: 10px;
     }
 
     .close-btn {
@@ -288,10 +281,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
     }
 
     .modal-body {
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       flex-grow: 1;
       padding-right: 4px;
       margin-bottom: 16px;
@@ -324,7 +319,7 @@
     }
 
     .modal-desc-title {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 600;
       margin: 0 0 8px;
     }
@@ -345,6 +340,7 @@
       background: #f0f7ff;
       padding: 10px 14px;
       border-radius: 12px;
+      flex-shrink: 0;
     }
 
     .form-group {
@@ -386,7 +382,6 @@
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
-      margin-top: 6px;
       flex-shrink: 0;
     }
 
@@ -500,11 +495,11 @@
       }
 
       container.innerHTML = list.map((v, index) => {
-        const title = v.title || v.Nazwa || 'Вакансия';
-        const city = v.city || v.Miasto || 'Польша';
-        const rate = v.rate || v.Stawka || '';
-        const housing = v.housing || v.Zakwaterowanie || '';
-        const desc = v.description || v.Opis || '';
+        const title = v.title || v.Nazwa || v['Назва вакансії'] || 'Вакансия';
+        const city = v.city || v.Miasto || v['Місто'] || 'Польша';
+        const rate = v.rate || v.Stawka || v.stawka || v['Ставка (zł/год)'] || 'По договоренности';
+        const housing = v.housing || v.Zakwaterowanie || v.zakwaterowanie || v['Житло'] || '';
+        const desc = v.description || v.Opis || v.opis || v["Опис обов'язків"] || '';
 
         return `
           <div class="card" onclick="openDetails(${index})">
@@ -529,9 +524,9 @@
     function filterVacancies() {
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
       const filtered = allVacancies.filter(v => {
-        const title = (v.title || v.Nazwa || '').toLowerCase();
-        const city = (v.city || v.Miasto || '').toLowerCase();
-        const desc = (v.description || v.Opis || '').toLowerCase();
+        const title = (v.title || v.Nazwa || v['Назва вакансії'] || '').toLowerCase();
+        const city = (v.city || v.Miasto || v['Місто'] || '').toLowerCase();
+        const desc = (v.description || v.Opis || v.opis || v["Опис обов'язків"] || '').toLowerCase();
         return title.includes(query) || city.includes(query) || desc.includes(query);
       });
       renderVacancies(filtered);
@@ -540,13 +535,13 @@
     function openDetails(index) {
       const v = allVacancies[index];
       if (!v) return;
-      selectedVacancy = v.title || v.Nazwa || 'Вакансия';
+      selectedVacancy = v.title || v.Nazwa || v['Назва вакансії'] || 'Вакансия';
       
       document.getElementById('detTitle').innerText = selectedVacancy;
-      document.getElementById('detCity').innerText = v.city || v.Miasto || 'Польша';
-      document.getElementById('detRate').innerText = v.rate || v.Stawka || 'По договоренности';
+      document.getElementById('detCity').innerText = v.city || v.Miasto || v['Місто'] || 'Польша';
+      document.getElementById('detRate').innerText = v.rate || v.Stawka || v.stawka || v['Ставка (zł/год)'] || 'По договоренности';
       
-      const housing = v.housing || v.Zakwaterowanie || '';
+      const housing = v.housing || v.Zakwaterowanie || v.zakwaterowanie || v['Житло'] || '';
       const housingBlock = document.getElementById('detHousingBlock');
       if (housing) {
         document.getElementById('detHousing').innerText = housing;
@@ -555,7 +550,7 @@
         housingBlock.style.display = 'none';
       }
 
-      document.getElementById('detDesc').innerText = v.description || v.Opis || 'Описание отсутствует.';
+      document.getElementById('detDesc').innerText = v.description || v.Opis || v.opis || v["Опис обов'язків"] || 'Описание отсутствует.';
       document.getElementById('detailsModal').classList.add('active');
     }
 
