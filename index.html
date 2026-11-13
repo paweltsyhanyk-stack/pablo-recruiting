@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Pavlo Jobs • Робота в Польщі</title>
+  <title>Pavlo Jobs • Работа в Польше</title>
   <style>
     :root {
       --bg-color: #f5f5f7;
@@ -314,33 +314,33 @@
 <body>
 
   <header>
-    <div class="logo">Pavlo Jobs • Вакансії</div>
-    <div class="badge-header">Офіційне працевлаштування</div>
+    <div class="logo">Pavlo Jobs • Вакансии</div>
+    <div class="badge-header">Официальное трудоустройство</div>
   </header>
 
   <div class="container">
     <div class="search-box">
       <span class="search-icon">🔍</span>
-      <input type="text" id="searchInput" class="search-input" placeholder="Пошук за назвою або містом..." oninput="filterVacancies()">
+      <input type="text" id="searchInput" class="search-input" placeholder="Поиск по названию или городу..." oninput="filterVacancies()">
     </div>
 
     <div id="vacanciesContainer" class="vacancy-list">
-      <div class="status-msg">Завантаження актуальних вакансій...</div>
+      <div class="status-msg">Загрузка актуальных вакансий...</div>
     </div>
   </div>
 
-  <!-- Модальне вікно відгуку -->
+  <!-- Модальное окно отклика -->
   <div id="applyModal" class="modal-overlay" onclick="closeModalOnOverlay(event)">
     <div class="modal">
       <div class="modal-top">
-        <h3 class="modal-title">Відгукнутися на вакансію</h3>
+        <h3 class="modal-title">Откликнуться на вакансию</h3>
         <button class="close-btn" onclick="closeModal()">✕</button>
       </div>
       <div id="modalVacancyTitle" class="selected-vacancy-label"></div>
 
       <div class="form-group">
-        <label for="applicantName">Ваше ім'я та прізвище *</label>
-        <input type="text" id="applicantName" class="form-control" placeholder="Наприклад: Олександр Коваль">
+        <label for="applicantName">Ваше имя и фамилия *</label>
+        <input type="text" id="applicantName" class="form-control" placeholder="Например: Александр Коваль">
       </div>
 
       <div class="form-group">
@@ -349,11 +349,11 @@
       </div>
 
       <div class="form-group">
-        <label for="applicantComment">Коментар (вік, місто, документи)</label>
-        <textarea id="applicantComment" class="form-control" rows="3" placeholder="Наприклад: Вже в Польщі, готовий вийти з понеділка"></textarea>
+        <label for="applicantComment">Комментарий (возраст, город, документы)</label>
+        <textarea id="applicantComment" class="form-control" rows="3" placeholder="Например: Уже в Польше, готов выйти с понедельника"></textarea>
       </div>
 
-      <button class="submit-btn" onclick="submitForm()">Надіслати заявку</button>
+      <button class="submit-btn" onclick="submitForm()">Отправить заявку</button>
     </div>
   </div>
 
@@ -372,20 +372,20 @@
         renderVacancies(allVacancies);
       } catch (error) {
         console.error(error);
-        container.innerHTML = '<div class="status-msg error-msg">Не вдалося завантажити вакансії. Перевірте доступ до Google Apps Script або спробуйте пізніше.</div>';
+        container.innerHTML = '<div class="status-msg error-msg">Не удалось загрузить вакансии. Проверьте доступ к Google Apps Script или попробуйте позже.</div>';
       }
     }
 
     function renderVacancies(list) {
       const container = document.getElementById('vacanciesContainer');
       if (!list || list.length === 0) {
-        container.innerHTML = '<div class="status-msg">Наразі активних вакансій не знайдено.</div>';
+        container.innerHTML = '<div class="status-msg">Сейчас активных вакансий не найдено.</div>';
         return;
       }
 
       container.innerHTML = list.map(v => {
-        const title = v.title || v.Nazwa || 'Вакансія';
-        const city = v.city || v.Miasto || 'Польща';
+        const title = v.title || v.Nazwa || 'Вакансия';
+        const city = v.city || v.Miasto || 'Польша';
         const rate = v.rate || v.Stawka || '';
         const housing = v.housing || v.Zakwaterowanie || '';
         const desc = v.description || v.Opis || '';
@@ -402,7 +402,7 @@
               ${housing ? `<span>🏠 ${housing}</span>` : ''}
             </div>
             ${desc ? `<p class="card-desc">${desc}</p>` : ''}
-            <button class="apply-btn" onclick="openModal('${safeTitle}')">Подати заявку</button>
+            <button class="apply-btn" onclick="openModal('${safeTitle}')">Подать заявку</button>
           </div>
         `;
       }).join('');
@@ -421,7 +421,7 @@
 
     function openModal(title) {
       selectedVacancy = title;
-      document.getElementById('modalVacancyTitle').innerText = 'Вакансія: ' + title;
+      document.getElementById('modalVacancyTitle').innerText = 'Вакансия: ' + title;
       document.getElementById('applyModal').classList.add('active');
     }
 
@@ -439,12 +439,12 @@
       const comment = document.getElementById('applicantComment').value.trim();
 
       if (!name || !phone) {
-        alert('Будь ласка, вкажіть ваше ім’я та контактний телефон!');
+        alert('Пожалуйста, укажите ваше имя и контактный телефон!');
         return;
       }
 
       const btn = document.querySelector('.submit-btn');
-      btn.innerText = 'Відправка...';
+      btn.innerText = 'Отправка...';
       btn.disabled = true;
 
       fetch(API_URL, {
@@ -459,17 +459,17 @@
         })
       })
       .then(() => {
-        alert('✅ Дякуємо! Ваша заявка успішно відправлена. Координатор зв’яжеться з вами найближчим часом.');
+        alert('✅ Спасибо! Ваша заявка успешно отправлена. Координатор свяжется с вами в ближайшее время.');
         document.getElementById('applicantName').value = '';
         document.getElementById('applicantPhone').value = '';
         document.getElementById('applicantComment').value = '';
         closeModal();
       })
       .catch(() => {
-        alert('Сталася помилка при відправці. Спробуйте ще раз.');
+        alert('Произошла ошибка при отправке. Попробуйте ещё раз.');
       })
       .finally(() => {
-        btn.innerText = 'Надіслати заявку';
+        btn.innerText = 'Отправить заявку';
         btn.disabled = false;
       });
     }
