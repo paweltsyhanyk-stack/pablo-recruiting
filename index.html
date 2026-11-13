@@ -108,7 +108,12 @@
       padding: 20px;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
       border: 1px solid rgba(0, 0, 0, 0.04);
-      transition: transform 0.15s ease;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .card:active {
+      transform: scale(0.99);
     }
 
     .card-header {
@@ -145,21 +150,47 @@
       margin-bottom: 12px;
     }
 
-    .card-desc {
+    .card-desc-preview {
       font-size: 15px;
       color: #333336;
       margin: 0 0 16px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
       white-space: pre-line;
     }
 
+    .card-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-details {
+      flex: 1;
+      background: #f2f2f7;
+      color: var(--text-main);
+      border: none;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-details:hover {
+      background: #e5e5ea;
+    }
+
     .apply-btn {
-      width: 100%;
+      flex: 1;
       background: var(--accent);
       color: #fff;
       border: none;
       border-radius: 12px;
-      padding: 13px;
-      font-size: 16px;
+      padding: 12px;
+      font-size: 15px;
       font-weight: 600;
       cursor: pointer;
       transition: background 0.2s, transform 0.1s;
@@ -207,7 +238,10 @@
     .modal {
       background: var(--card-bg);
       width: 100%;
-      max-width: 460px;
+      max-width: 520px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
       border-radius: 22px 22px 0 0;
       padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
       box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
@@ -218,6 +252,7 @@
       .modal {
         border-radius: 20px;
         padding: 26px;
+        max-height: 85vh;
       }
     }
 
@@ -231,19 +266,21 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 16px;
+      flex-shrink: 0;
     }
 
     .modal-title {
-      font-size: 19px;
+      font-size: 20px;
       font-weight: 700;
       margin: 0;
+      letter-spacing: -0.01em;
     }
 
     .close-btn {
       background: #f2f2f7;
       border: none;
-      width: 30px;
-      height: 30px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       font-size: 18px;
       color: var(--text-secondary);
@@ -253,14 +290,61 @@
       justify-content: center;
     }
 
+    .modal-body {
+      overflow-y: auto;
+      flex-grow: 1;
+      padding-right: 4px;
+      margin-bottom: 16px;
+    }
+
+    .modal-meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .modal-meta-item {
+      background: #f8f8f6;
+      padding: 12px;
+      border-radius: 12px;
+    }
+
+    .modal-meta-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+
+    .modal-meta-value {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .modal-desc-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0 0 8px;
+    }
+
+    .modal-desc-text {
+      font-size: 15px;
+      color: #333336;
+      white-space: pre-line;
+      line-height: 1.5;
+      margin: 0;
+    }
+
     .selected-vacancy-label {
       font-size: 14px;
       color: var(--accent);
       font-weight: 500;
       margin-bottom: 16px;
       background: #f0f7ff;
-      padding: 8px 12px;
-      border-radius: 10px;
+      padding: 10px 14px;
+      border-radius: 12px;
     }
 
     .form-group {
@@ -303,6 +387,7 @@
       font-weight: 600;
       cursor: pointer;
       margin-top: 6px;
+      flex-shrink: 0;
     }
 
     .submit-btn:disabled {
@@ -329,28 +414,59 @@
     </div>
   </div>
 
+  <!-- Модальное окно просмотра вакансии (Подробнее) -->
+  <div id="detailsModal" class="modal-overlay" onclick="closeDetailsOnOverlay(event)">
+    <div class="modal">
+      <div class="modal-top">
+        <h3 id="detTitle" class="modal-title">Детали вакансии</h3>
+        <button class="close-btn" onclick="closeDetailsModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-meta-grid">
+          <div class="modal-meta-item">
+            <div class="modal-meta-label">Город / Локация</div>
+            <div id="detCity" class="modal-meta-value">-</div>
+          </div>
+          <div class="modal-meta-item">
+            <div class="modal-meta-label">Ставка</div>
+            <div id="detRate" class="modal-meta-value">-</div>
+          </div>
+          <div class="modal-meta-item" id="detHousingBlock" style="grid-column: span 2;">
+            <div class="modal-meta-label">Проживание</div>
+            <div id="detHousing" class="modal-meta-value">-</div>
+          </div>
+        </div>
+        <h4 class="modal-desc-title">Описание и условия</h4>
+        <p id="detDesc" class="modal-desc-text">-</p>
+      </div>
+      <button class="submit-btn" onclick="applyFromDetails()">Подать заявку</button>
+    </div>
+  </div>
+
   <!-- Модальное окно отклика -->
-  <div id="applyModal" class="modal-overlay" onclick="closeModalOnOverlay(event)">
+  <div id="applyModal" class="modal-overlay" onclick="closeApplyOnOverlay(event)">
     <div class="modal">
       <div class="modal-top">
         <h3 class="modal-title">Откликнуться на вакансию</h3>
-        <button class="close-btn" onclick="closeModal()">✕</button>
+        <button class="close-btn" onclick="closeApplyModal()">✕</button>
       </div>
       <div id="modalVacancyTitle" class="selected-vacancy-label"></div>
 
-      <div class="form-group">
-        <label for="applicantName">Ваше имя и фамилия *</label>
-        <input type="text" id="applicantName" class="form-control" placeholder="Например: Александр Коваль">
-      </div>
+      <div class="modal-body" style="overflow-y: visible;">
+        <div class="form-group">
+          <label for="applicantName">Ваше имя и фамилия *</label>
+          <input type="text" id="applicantName" class="form-control" placeholder="Например: Александр Коваль">
+        </div>
 
-      <div class="form-group">
-        <label for="applicantPhone">Телефон (Viber / Telegram) *</label>
-        <input type="tel" id="applicantPhone" class="form-control" placeholder="+48 000 000 000">
-      </div>
+        <div class="form-group">
+          <label for="applicantPhone">Телефон (Viber / Telegram) *</label>
+          <input type="tel" id="applicantPhone" class="form-control" placeholder="+48 000 000 000">
+        </div>
 
-      <div class="form-group">
-        <label for="applicantComment">Комментарий (возраст, город, документы)</label>
-        <textarea id="applicantComment" class="form-control" rows="3" placeholder="Например: Уже в Польше, готов выйти с понедельника"></textarea>
+        <div class="form-group">
+          <label for="applicantComment">Комментарий (возраст, город, документы)</label>
+          <textarea id="applicantComment" class="form-control" rows="3" placeholder="Например: Уже в Польше, готов выйти с понедельника"></textarea>
+        </div>
       </div>
 
       <button class="submit-btn" onclick="submitForm()">Отправить заявку</button>
@@ -383,16 +499,15 @@
         return;
       }
 
-      container.innerHTML = list.map(v => {
+      container.innerHTML = list.map((v, index) => {
         const title = v.title || v.Nazwa || 'Вакансия';
         const city = v.city || v.Miasto || 'Польша';
         const rate = v.rate || v.Stawka || '';
         const housing = v.housing || v.Zakwaterowanie || '';
         const desc = v.description || v.Opis || '';
-        const safeTitle = title.replace(/'/g, "\\'");
 
         return `
-          <div class="card">
+          <div class="card" onclick="openDetails(${index})">
             <div class="card-header">
               <h2 class="card-title">${title}</h2>
               ${rate ? `<span class="card-rate">${rate}</span>` : ''}
@@ -401,8 +516,11 @@
               <span>📍 ${city}</span>
               ${housing ? `<span>🏠 ${housing}</span>` : ''}
             </div>
-            ${desc ? `<p class="card-desc">${desc}</p>` : ''}
-            <button class="apply-btn" onclick="openModal('${safeTitle}')">Подать заявку</button>
+            ${desc ? `<p class="card-desc-preview">${desc}</p>` : ''}
+            <div class="card-actions" onclick="event.stopPropagation()">
+              <button class="btn-details" onclick="openDetails(${index})">Подробнее</button>
+              <button class="apply-btn" onclick="openApplyModal('${title.replace(/'/g, "\\'")}')">Подать заявку</button>
+            </div>
           </div>
         `;
       }).join('');
@@ -419,18 +537,53 @@
       renderVacancies(filtered);
     }
 
-    function openModal(title) {
+    function openDetails(index) {
+      const v = allVacancies[index];
+      if (!v) return;
+      selectedVacancy = v.title || v.Nazwa || 'Вакансия';
+      
+      document.getElementById('detTitle').innerText = selectedVacancy;
+      document.getElementById('detCity').innerText = v.city || v.Miasto || 'Польша';
+      document.getElementById('detRate').innerText = v.rate || v.Stawka || 'По договоренности';
+      
+      const housing = v.housing || v.Zakwaterowanie || '';
+      const housingBlock = document.getElementById('detHousingBlock');
+      if (housing) {
+        document.getElementById('detHousing').innerText = housing;
+        housingBlock.style.display = 'block';
+      } else {
+        housingBlock.style.display = 'none';
+      }
+
+      document.getElementById('detDesc').innerText = v.description || v.Opis || 'Описание отсутствует.';
+      document.getElementById('detailsModal').classList.add('active');
+    }
+
+    function closeDetailsModal() {
+      document.getElementById('detailsModal').classList.remove('active');
+    }
+
+    function closeDetailsOnOverlay(e) {
+      if (e.target.id === 'detailsModal') closeDetailsModal();
+    }
+
+    function applyFromDetails() {
+      closeDetailsModal();
+      openApplyModal(selectedVacancy);
+    }
+
+    function openApplyModal(title) {
       selectedVacancy = title;
       document.getElementById('modalVacancyTitle').innerText = 'Вакансия: ' + title;
       document.getElementById('applyModal').classList.add('active');
     }
 
-    function closeModal() {
+    function closeApplyModal() {
       document.getElementById('applyModal').classList.remove('active');
     }
 
-    function closeModalOnOverlay(e) {
-      if (e.target.id === 'applyModal') closeModal();
+    function closeApplyOnOverlay(e) {
+      if (e.target.id === 'applyModal') closeApplyModal();
     }
 
     function submitForm() {
@@ -443,7 +596,7 @@
         return;
       }
 
-      const btn = document.querySelector('.submit-btn');
+      const btn = document.querySelector('#applyModal .submit-btn');
       btn.innerText = 'Отправка...';
       btn.disabled = true;
 
@@ -463,7 +616,7 @@
         document.getElementById('applicantName').value = '';
         document.getElementById('applicantPhone').value = '';
         document.getElementById('applicantComment').value = '';
-        closeModal();
+        closeApplyModal();
       })
       .catch(() => {
         alert('Произошла ошибка при отправке. Попробуйте ещё раз.');
@@ -476,7 +629,5 @@
 
     loadVacancies();
   </script>
-</body>
-</html>
 </body>
 </html>
