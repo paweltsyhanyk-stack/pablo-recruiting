@@ -473,13 +473,13 @@
     let allVacancies = [];
     let selectedVacancy = '';
 
-    // Точная и надежная функция поиска полей
-    function getVal(v, keywords, targetIndex) {
+    function getField(v, index, keywords) {
       if (!v) return '';
-
-      // Если данные пришли в виде массива (строка таблицы)
       if (Array.isArray(v)) {
-        // Пробуем найти элемент, содержащий ключевое слово (например, 'zł')
+        if (index !== undefined && v[index] !== undefined && v[index] !== null && String(v[index]).trim() !== '') {
+          let val = String(v[index]).trim();
+          if (val !== '') return val;
+        }
         for (let item of v) {
           if (item != null) {
             let s = String(item).trim();
@@ -488,15 +488,8 @@
             }
           }
         }
-        // Если по ключевым словам не нашли, берем по точному индексу
-        if (targetIndex !== undefined && v[targetIndex] !== undefined && v[targetIndex] !== null) {
-          let val = String(v[targetIndex]).trim();
-          if (val !== '') return val;
-        }
         return '';
       }
-
-      // Если данные пришли в виде объекта
       if (typeof v === 'object') {
         for (let key in v) {
           let k = String(key).toLowerCase();
@@ -505,17 +498,59 @@
             if (val != null && String(val).trim() !== '') return String(val).trim();
           }
         }
-        // Дополнительный поиск по значению (для ставки ищем 'zł' или цифры с запятой/точкой)
-        if (keywords.includes('stavka') || keywords.includes('ставк')) {
+      }
+      return '';
+    }
+
+    function formatRate(rawRate) {
+      if (!rawRate || rawRate === 'По договоренности') return 'По договоренности';
+      let clean = rawRate.replace(/нетто|netto/gi, '').trim();
+      if (!clean.toLowerCase().includes('zł') && !clean.toLowerCase().includes('зл')) {
+        clean += ' zł';
+      }
+      return clean + ' нетто';
+    }
+
+    function getRate(v) {
+      let raw = '';
+      if (Array.isArray(v)) {
+        if (v[4] !== undefined && v[4] !== null) {
+          let s = String(v[4]).trim();
+          if (s !== '' && !/^\d+$/.test(s)) raw = s;
+        }
+        if (!raw) {
+          for (let item of v) {
+            if (item != null) {
+              let s = String(item).trim();
+              if (s.toLowerCase().includes('zł') || s.toLowerCase().includes('зл')) {
+                raw = s;
+                break;
+              }
+            }
+          }
+        }
+      } else if (typeof v === 'object') {
+        for (let key in v) {
+          let k = String(key).toLowerCase();
+          if (k.includes('ставк') || k.includes('stawka') || k.includes('rate')) {
+            let val = v[key];
+            if (val != null && String(val).trim() !== '') {
+              raw = String(val).trim();
+              break;
+            }
+          }
+        }
+        if (!raw) {
           for (let key in v) {
             let val = String(v[key] || '').trim();
             if (val.toLowerCase().includes('zł') || val.toLowerCase().includes('зл')) {
-              return val;
+              raw = val;
+              break;
             }
           }
         }
       }
-      return '';
+      return formatRate(raw);
     }
 
     async function loadVacancies() {
@@ -540,15 +575,11 @@
       }
 
       container.innerHTML = list.map((v, index) => {
-        const title = getVal(v, ['назв', 'nazwa', 'title', 'ваканс'], 1) || 'Вакансия';
-        const city = getVal(v, ['міст', 'город', 'miasto', 'city'], 3) || 'Польша';
-        let rate = getVal(v, ['ставк', 'stawka', 'rate', 'zł'], 4);
-        if (!rate || rate.length > 15 || rate === '8') {
-          // Защитный поиск именно ставки с zł
-          rate = getVal(v, ['zł', 'зл'], -1) || 'По договоренности';
-        }
-        const housing = getVal(v, ['житл', 'прожив', 'zakwaterowanie', 'housing'], 5);
-        const desc = getVal(v, ['опис', 'описан', 'opis', 'desc', 'обов'], 7);
+        const title = getField(v, 1, ['назв', 'nazwa', 'title', 'ваканс']) || 'Вакансия';
+        const city = getField(v, 3, ['міст', 'город', 'miasto', 'city']) || 'Польша';
+        const rate = getRate(v);
+        const housing = getField(v, 5, ['житл', 'прожив', 'zakwaterowanie', 'housing']);
+        const desc = getField(v, 7, ['опис', 'описан', 'opis', 'desc', 'обов']);
 
         return `
           <div class="card" onclick="openDetails(${index})">
@@ -573,9 +604,9 @@
     function filterVacancies() {
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
       const filtered = allVacancies.filter(v => {
-        const title = getVal(v, ['назв', 'nazwa', 'title', 'ваканс'], 1).toLowerCase();
-        const city = getVal(v, ['міст', 'город', 'miasto', 'city'], 3).toLowerCase();
-        const desc = getVal(v, ['опис', 'описан', 'opis', 'desc', 'обов'], 7).toLowerCase();
+        const title = getField(v, 1, ['назв', 'nazwa', 'title', 'ваканс']).toLowerCase();
+        const city = getField(v, 3, ['міст', 'город', 'miasto', 'city']).toLowerCase();
+        const desc = getField(v, 7, ['опис', 'описан', 'opis', 'desc', 'обов']).toLowerCase();
         return title.includes(query) || city.includes(query) || desc.includes(query);
       });
       renderVacancies(filtered);
@@ -584,18 +615,13 @@
     function openDetails(index) {
       const v = allVacancies[index];
       if (!v) return;
-      selectedVacancy = getVal(v, ['назв', 'nazwa', 'title', 'ваканс'], 1) || 'Вакансия';
+      selectedVacancy = getField(v, 1, ['назв', 'nazwa', 'title', 'ваканс']) || 'Вакансия';
       
       document.getElementById('detTitle').innerText = selectedVacancy;
-      document.getElementById('detCity').innerText = getVal(v, ['міст', 'город', 'miasto', 'city'], 3) || 'Польша';
+      document.getElementById('detCity').innerText = getField(v, 3, ['міст', 'город', 'miasto', 'city']) || 'Польша';
+      document.getElementById('detRate').innerText = getRate(v);
       
-      let rate = getVal(v, ['ставк', 'stawka', 'rate', 'zł'], 4);
-      if (!rate || rate.length > 15 || rate === '8') {
-        rate = getVal(v, ['zł', 'зл'], -1) || 'По договоренности';
-      }
-      document.getElementById('detRate').innerText = rate;
-      
-      const housing = getVal(v, ['житл', 'прожив', 'zakwaterowanie', 'housing'], 5);
+      const housing = getField(v, 5, ['житл', 'прожив', 'zakwaterowanie', 'housing']);
       const housingBlock = document.getElementById('detHousingBlock');
       if (housing) {
         document.getElementById('detHousing').innerText = housing;
@@ -604,7 +630,7 @@
         housingBlock.style.display = 'none';
       }
 
-      document.getElementById('detDesc').innerText = getVal(v, ['опис', 'описан', 'opis', 'desc', 'обов'], 7) || 'Описание отсутствует.';
+      document.getElementById('detDesc').innerText = getField(v, 7, ['опис', 'описан', 'opis', 'desc', 'обов']) || 'Описание отсутствует.';
       document.getElementById('detailsModal').classList.add('active');
     }
 
