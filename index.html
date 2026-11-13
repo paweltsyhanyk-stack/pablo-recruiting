@@ -238,14 +238,20 @@
     .modal {
       background: var(--card-bg);
       width: 100%;
-      max-width: 520px;
-      max-height: 85vh;
+      max-width: 580px;
+      max-height: 90vh;
       display: flex;
       flex-direction: column;
       border-radius: 22px 22px 0 0;
       padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
       box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
       animation: slideUp 0.25s ease-out;
+    }
+
+    @media (min-width: 600px) {
+      .modal {
+        border-radius: 22px;
+      }
     }
 
     @keyframes slideUp {
@@ -262,7 +268,7 @@
     }
 
     .modal-title {
-      font-size: 19px;
+      font-size: 20px;
       font-weight: 700;
       margin: 0;
       letter-spacing: -0.01em;
@@ -292,44 +298,28 @@
       margin-bottom: 16px;
     }
 
-    .modal-meta-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-
-    .modal-meta-item {
+    .modal-section {
       background: #f8f8f6;
-      padding: 12px;
-      border-radius: 12px;
+      padding: 14px;
+      border-radius: 14px;
+      margin-bottom: 12px;
     }
 
-    .modal-meta-label {
+    .modal-section-title {
       font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
       color: var(--text-secondary);
       margin-bottom: 4px;
-      font-weight: 500;
+      font-weight: 600;
     }
 
-    .modal-meta-value {
+    .modal-section-content {
       font-size: 15px;
-      font-weight: 600;
       color: var(--text-main);
-    }
-
-    .modal-desc-title {
-      font-size: 15px;
-      font-weight: 600;
-      margin: 0 0 8px;
-    }
-
-    .modal-desc-text {
-      font-size: 15px;
-      color: #333336;
+      font-weight: 500;
       white-space: pre-line;
-      line-height: 1.5;
-      margin: 0;
+      line-height: 1.45;
     }
 
     .selected-vacancy-label {
@@ -401,7 +391,7 @@
   <div class="container">
     <div class="search-box">
       <span class="search-icon">🔍</span>
-      <input type="text" id="searchInput" class="search-input" placeholder="Поиск по названию или городу..." oninput="filterVacancies()">
+      <input type="text" id="searchInput" class="search-input" placeholder="Поиск по названию, клиенту или городу..." oninput="filterVacancies()">
     </div>
 
     <div id="vacanciesContainer" class="vacancy-list">
@@ -409,7 +399,7 @@
     </div>
   </div>
 
-  <!-- Модальное окно просмотра вакансии (Подробнее) -->
+  <!-- Модальное окно детального просмотра -->
   <div id="detailsModal" class="modal-overlay" onclick="closeDetailsOnOverlay(event)">
     <div class="modal">
       <div class="modal-top">
@@ -417,22 +407,43 @@
         <button class="close-btn" onclick="closeDetailsModal()">✕</button>
       </div>
       <div class="modal-body">
-        <div class="modal-meta-grid">
-          <div class="modal-meta-item">
-            <div class="modal-meta-label">Город / Локация</div>
-            <div id="detCity" class="modal-meta-value">-</div>
+        
+        <div class="modal-section" id="clientBlock">
+          <div class="modal-section-title">О клиенте / заказчике</div>
+          <div id="detClient" class="modal-section-content">-</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="modal-section">
+            <div class="modal-section-title">Локация / Адрес</div>
+            <div id="detCity" class="modal-section-content">-</div>
           </div>
-          <div class="modal-meta-item">
-            <div class="modal-meta-label">Ставка</div>
-            <div id="detRate" class="modal-meta-value">-</div>
-          </div>
-          <div class="modal-meta-item" id="detHousingBlock" style="grid-column: span 2;">
-            <div class="modal-meta-label">Проживание</div>
-            <div id="detHousing" class="modal-meta-value">-</div>
+          <div class="modal-section">
+            <div class="modal-section-title">Ставка</div>
+            <div id="detRate" class="modal-section-content" style="color: var(--accent); font-weight: 700;">-</div>
           </div>
         </div>
-        <h4 class="modal-desc-title">Описание и условия</h4>
-        <p id="detDesc" class="modal-desc-text">-</p>
+
+        <div class="modal-section" id="housingBlock">
+          <div class="modal-section-title">Проживание</div>
+          <div id="detHousing" class="modal-section-content">-</div>
+        </div>
+
+        <div class="modal-section" id="scheduleBlock">
+          <div class="modal-section-title">График работы</div>
+          <div id="detSchedule" class="modal-section-content">-</div>
+        </div>
+
+        <div class="modal-section" id="descBlock">
+          <div class="modal-section-title">Обязанности</div>
+          <div id="detDesc" class="modal-section-content">-</div>
+        </div>
+
+        <div class="modal-section" id="reqBlock">
+          <div class="modal-section-title">Требования к кандидатам</div>
+          <div id="detReq" class="modal-section-content">-</div>
+        </div>
+
       </div>
       <button class="submit-btn" onclick="applyFromDetails()">Подать заявку</button>
     </div>
@@ -473,12 +484,12 @@
     let allVacancies = [];
     let selectedVacancy = '';
 
+    // Универсальное извлечение колонок (поддерживает индексы и текстовые ключи)
     function getField(v, index, keywords) {
       if (!v) return '';
       if (Array.isArray(v)) {
         if (index !== undefined && v[index] !== undefined && v[index] !== null && String(v[index]).trim() !== '') {
-          let val = String(v[index]).trim();
-          if (val !== '') return val;
+          return String(v[index]).trim();
         }
         for (let item of v) {
           if (item != null) {
@@ -502,55 +513,13 @@
       return '';
     }
 
-    function formatRate(rawRate) {
-      if (!rawRate || rawRate === 'По договоренности') return 'По договоренности';
-      let clean = rawRate.replace(/нетто|netto/gi, '').trim();
-      if (!clean.toLowerCase().includes('zł') && !clean.toLowerCase().includes('зл')) {
-        clean += ' zł';
-      }
-      return clean + ' нетто';
-    }
-
     function getRate(v) {
-      let raw = '';
-      if (Array.isArray(v)) {
-        if (v[4] !== undefined && v[4] !== null) {
-          let s = String(v[4]).trim();
-          if (s !== '' && !/^\d+$/.test(s)) raw = s;
-        }
-        if (!raw) {
-          for (let item of v) {
-            if (item != null) {
-              let s = String(item).trim();
-              if (s.toLowerCase().includes('zł') || s.toLowerCase().includes('зл')) {
-                raw = s;
-                break;
-              }
-            }
-          }
-        }
-      } else if (typeof v === 'object') {
-        for (let key in v) {
-          let k = String(key).toLowerCase();
-          if (k.includes('ставк') || k.includes('stawka') || k.includes('rate')) {
-            let val = v[key];
-            if (val != null && String(val).trim() !== '') {
-              raw = String(val).trim();
-              break;
-            }
-          }
-        }
-        if (!raw) {
-          for (let key in v) {
-            let val = String(v[key] || '').trim();
-            if (val.toLowerCase().includes('zł') || val.toLowerCase().includes('зл')) {
-              raw = val;
-              break;
-            }
-          }
-        }
+      if (Array.isArray(v) && v[4] !== undefined && v[4] !== null) {
+        let s = String(v[4]).trim();
+        if (s !== '') return s;
       }
-      return formatRate(raw);
+      let r = getField(v, 4, ['ставк', 'stawka', 'rate', 'zł']);
+      return r || 'По договоренности';
     }
 
     async function loadVacancies() {
@@ -576,7 +545,8 @@
 
       container.innerHTML = list.map((v, index) => {
         const title = getField(v, 1, ['назв', 'nazwa', 'title', 'ваканс']) || 'Вакансия';
-        const city = getField(v, 3, ['міст', 'город', 'miasto', 'city']) || 'Польша';
+        const client = getField(v, 2, ['клиент', 'client', 'компан', 'baks']);
+        const city = getField(v, 3, ['міст', 'город', 'miasto', 'city', 'адрес']);
         const rate = getRate(v);
         const housing = getField(v, 5, ['житл', 'прожив', 'zakwaterowanie', 'housing']);
         const desc = getField(v, 7, ['опис', 'описан', 'opis', 'desc', 'обов']);
@@ -588,9 +558,10 @@
               ${rate ? `<span class="card-rate">${rate}</span>` : ''}
             </div>
             <div class="card-meta">
-              <span>📍 ${city}</span>
+              ${city ? `<span>📍 ${city}</span>` : ''}
               ${housing ? `<span>🏠 ${housing}</span>` : ''}
             </div>
+            ${client ? `<div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; font-weight: 500;">🏢 ${client}</div>` : ''}
             ${desc ? `<p class="card-desc-preview">${desc}</p>` : ''}
             <div class="card-actions" onclick="event.stopPropagation()">
               <button class="btn-details" onclick="openDetails(${index})">Подробнее</button>
@@ -605,9 +576,10 @@
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
       const filtered = allVacancies.filter(v => {
         const title = getField(v, 1, ['назв', 'nazwa', 'title', 'ваканс']).toLowerCase();
+        const client = getField(v, 2, ['клиент', 'client', 'компан']).toLowerCase();
         const city = getField(v, 3, ['міст', 'город', 'miasto', 'city']).toLowerCase();
         const desc = getField(v, 7, ['опис', 'описан', 'opis', 'desc', 'обов']).toLowerCase();
-        return title.includes(query) || city.includes(query) || desc.includes(query);
+        return title.includes(query) || client.includes(query) || city.includes(query) || desc.includes(query);
       });
       renderVacancies(filtered);
     }
@@ -618,11 +590,26 @@
       selectedVacancy = getField(v, 1, ['назв', 'nazwa', 'title', 'ваканс']) || 'Вакансия';
       
       document.getElementById('detTitle').innerText = selectedVacancy;
-      document.getElementById('detCity').innerText = getField(v, 3, ['міст', 'город', 'miasto', 'city']) || 'Польша';
-      document.getElementById('detRate').innerText = getRate(v);
       
+      // Заполняем клиента
+      const client = getField(v, 2, ['клиент', 'client', 'компан']);
+      const clientBlock = document.getElementById('clientBlock');
+      if (client) {
+        document.getElementById('detClient').innerText = client;
+        clientBlock.style.display = 'block';
+      } else {
+        clientBlock.style.display = 'none';
+      }
+
+      // Город / Адрес
+      document.getElementById('detCity').innerText = getField(v, 3, ['міст', 'город', 'miasto', 'city', 'адрес']) || 'Польша';
+      
+      // Ставка (включая студенческие)
+      document.getElementById('detRate').innerText = getRate(v);
+
+      // Проживание (Жилье)
       const housing = getField(v, 5, ['житл', 'прожив', 'zakwaterowanie', 'housing']);
-      const housingBlock = document.getElementById('detHousingBlock');
+      const housingBlock = document.getElementById('housingBlock');
       if (housing) {
         document.getElementById('detHousing').innerText = housing;
         housingBlock.style.display = 'block';
@@ -630,7 +617,36 @@
         housingBlock.style.display = 'none';
       }
 
-      document.getElementById('detDesc').innerText = getField(v, 7, ['опис', 'описан', 'opis', 'desc', 'обов']) || 'Описание отсутствует.';
+      // График работы (Колонка G / индекс 6)
+      const schedule = getField(v, 6, ['графік', 'график', 'schedule', 'годин']);
+      const scheduleBlock = document.getElementById('scheduleBlock');
+      if (schedule) {
+        document.getElementById('detSchedule').innerText = schedule;
+        scheduleBlock.style.display = 'block';
+      } else {
+        scheduleBlock.style.display = 'none';
+      }
+
+      // Обязанности (Колонка H / индекс 7)
+      const desc = getField(v, 7, ['опис', 'описан', 'opis', 'desc', 'обов']);
+      const descBlock = document.getElementById('descBlock');
+      if (desc) {
+        document.getElementById('detDesc').innerText = desc;
+        descBlock.style.display = 'block';
+      } else {
+        descBlock.style.display = 'none';
+      }
+
+      // Требования (Колонка I / индекс 8)
+      const req = getField(v, 8, ['вимог', 'требован', 'req', 'умов']);
+      const reqBlock = document.getElementById('reqBlock');
+      if (req) {
+        document.getElementById('detReq').innerText = req;
+        reqBlock.style.display = 'block';
+      } else {
+        reqBlock.style.display = 'none';
+      }
+
       document.getElementById('detailsModal').classList.add('active');
     }
 
@@ -702,6 +718,10 @@
       });
     }
 
+    loadVacancies();
+  </script>
+</body>
+</html>
     loadVacancies();
   </script>
 </body>
