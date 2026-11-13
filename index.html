@@ -484,12 +484,16 @@
     let allVacancies = [];
     let selectedVacancy = '';
 
-    // Универсальное извлечение колонок (поддерживает индексы и текстовые ключи)
-    function getField(v, index, keywords) {
+    // Універсальна функція витягування полів за індексами та ключовими словами
+    function getVal(v, arrayIndices, keywords) {
       if (!v) return '';
       if (Array.isArray(v)) {
-        if (index !== undefined && v[index] !== undefined && v[index] !== null && String(v[index]).trim() !== '') {
-          return String(v[index]).trim();
+        if (arrayIndices) {
+          for (let idx of arrayIndices) {
+            if (v[idx] !== undefined && v[idx] !== null && String(v[idx]).trim() !== '' && String(v[idx]).trim() !== 'Активна') {
+              return String(v[idx]).trim();
+            }
+          }
         }
         for (let item of v) {
           if (item != null) {
@@ -511,15 +515,6 @@
         }
       }
       return '';
-    }
-
-    function getRate(v) {
-      if (Array.isArray(v) && v[4] !== undefined && v[4] !== null) {
-        let s = String(v[4]).trim();
-        if (s !== '') return s;
-      }
-      let r = getField(v, 4, ['ставк', 'stawka', 'rate', 'zł']);
-      return r || 'По договоренности';
     }
 
     async function loadVacancies() {
@@ -544,12 +539,12 @@
       }
 
       container.innerHTML = list.map((v, index) => {
-        const title = getField(v, 1, ['назв', 'nazwa', 'title', 'ваканс']) || 'Вакансия';
-        const client = getField(v, 2, ['клиент', 'client', 'компан', 'baks']);
-        const city = getField(v, 3, ['міст', 'город', 'miasto', 'city', 'адрес']);
-        const rate = getRate(v);
-        const housing = getField(v, 5, ['житл', 'прожив', 'zakwaterowanie', 'housing']);
-        const desc = getField(v, 7, ['опис', 'описан', 'opis', 'desc', 'обов']);
+        const title = getVal(v, [1], ['назв', 'title', 'ваканс']) || 'Вакансия';
+        const client = getVal(v, [2], ['клиент', 'client', 'компан']);
+        const city = getVal(v, [3], ['міст', 'город', 'miasto', 'city', 'адрес']);
+        const rate = getVal(v, [4], ['ставк', 'stawka', 'rate', 'zł']);
+        const housing = getVal(v, [5], ['житл', 'прожив', 'zakwaterowanie', 'housing']);
+        const desc = getVal(v, [7], ['опис', 'описан', 'opis', 'desc', 'обов']);
 
         return `
           <div class="card" onclick="openDetails(${index})">
@@ -575,10 +570,10 @@
     function filterVacancies() {
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
       const filtered = allVacancies.filter(v => {
-        const title = getField(v, 1, ['назв', 'nazwa', 'title', 'ваканс']).toLowerCase();
-        const client = getField(v, 2, ['клиент', 'client', 'компан']).toLowerCase();
-        const city = getField(v, 3, ['міст', 'город', 'miasto', 'city']).toLowerCase();
-        const desc = getField(v, 7, ['опис', 'описан', 'opis', 'desc', 'обов']).toLowerCase();
+        const title = getVal(v, [1], ['назв', 'title', 'ваканс']).toLowerCase();
+        const client = getVal(v, [2], ['клиент', 'client', 'компан']).toLowerCase();
+        const city = getVal(v, [3], ['міст', 'город', 'miasto', 'city']).toLowerCase();
+        const desc = getVal(v, [7], ['опис', 'описан', 'opis', 'desc', 'обов']).toLowerCase();
         return title.includes(query) || client.includes(query) || city.includes(query) || desc.includes(query);
       });
       renderVacancies(filtered);
@@ -587,12 +582,11 @@
     function openDetails(index) {
       const v = allVacancies[index];
       if (!v) return;
-      selectedVacancy = getField(v, 1, ['назв', 'nazwa', 'title', 'ваканс']) || 'Вакансия';
+      selectedVacancy = getVal(v, [1], ['назв', 'title', 'ваканс']) || 'Вакансия';
       
       document.getElementById('detTitle').innerText = selectedVacancy;
       
-      // Заполняем клиента
-      const client = getField(v, 2, ['клиент', 'client', 'компан']);
+      const client = getVal(v, [2], ['клиент', 'client', 'компан']);
       const clientBlock = document.getElementById('clientBlock');
       if (client) {
         document.getElementById('detClient').innerText = client;
@@ -601,14 +595,10 @@
         clientBlock.style.display = 'none';
       }
 
-      // Город / Адрес
-      document.getElementById('detCity').innerText = getField(v, 3, ['міст', 'город', 'miasto', 'city', 'адрес']) || 'Польша';
-      
-      // Ставка (включая студенческие)
-      document.getElementById('detRate').innerText = getRate(v);
+      document.getElementById('detCity').innerText = getVal(v, [3], ['міст', 'город', 'miasto', 'city', 'адрес']) || 'Польша';
+      document.getElementById('detRate').innerText = getVal(v, [4], ['ставк', 'stawka', 'rate', 'zł']) || 'По договоренности';
 
-      // Проживание (Жилье)
-      const housing = getField(v, 5, ['житл', 'прожив', 'zakwaterowanie', 'housing']);
+      const housing = getVal(v, [5], ['житл', 'прожив', 'zakwaterowanie', 'housing']);
       const housingBlock = document.getElementById('housingBlock');
       if (housing) {
         document.getElementById('detHousing').innerText = housing;
@@ -617,8 +607,7 @@
         housingBlock.style.display = 'none';
       }
 
-      // График работы (Колонка G / индекс 6)
-      const schedule = getField(v, 6, ['графік', 'график', 'schedule', 'годин']);
+      const schedule = getVal(v, [6], ['графік', 'график', 'schedule', 'годин']);
       const scheduleBlock = document.getElementById('scheduleBlock');
       if (schedule) {
         document.getElementById('detSchedule').innerText = schedule;
@@ -627,8 +616,7 @@
         scheduleBlock.style.display = 'none';
       }
 
-      // Обязанности (Колонка H / индекс 7)
-      const desc = getField(v, 7, ['опис', 'описан', 'opis', 'desc', 'обов']);
+      const desc = getVal(v, [7], ['опис', 'описан', 'opis', 'desc', 'обов']);
       const descBlock = document.getElementById('descBlock');
       if (desc) {
         document.getElementById('detDesc').innerText = desc;
@@ -637,8 +625,7 @@
         descBlock.style.display = 'none';
       }
 
-      // Требования (Колонка I / индекс 8)
-      const req = getField(v, 8, ['вимог', 'требован', 'req', 'умов']);
+      const req = getVal(v, [8], ['вимог', 'требован', 'req', 'умов']);
       const reqBlock = document.getElementById('reqBlock');
       if (req) {
         document.getElementById('detReq').innerText = req;
@@ -718,10 +705,6 @@
       });
     }
 
-    loadVacancies();
-  </script>
-</body>
-</html>
     loadVacancies();
   </script>
 </body>
