@@ -473,6 +473,23 @@
     let allVacancies = [];
     let selectedVacancy = '';
 
+    // Универсальная функция поиска ключей по ключевым словам (не боится скобок, пробелов и регистра)
+    function getProp(obj, keywords) {
+      if (!obj) return '';
+      for (let key in obj) {
+        const k = key.toLowerCase();
+        for (let word of keywords) {
+          if (k.includes(word)) {
+            const val = obj[key];
+            if (val !== undefined && val !== null && String(val).trim() !== '') {
+              return String(val).trim();
+            }
+          }
+        }
+      }
+      return '';
+    }
+
     async function loadVacancies() {
       const container = document.getElementById('vacanciesContainer');
       try {
@@ -495,11 +512,11 @@
       }
 
       container.innerHTML = list.map((v, index) => {
-        const title = v.title || v.Nazwa || v['Назва вакансії'] || 'Вакансия';
-        const city = v.city || v.Miasto || v['Місто'] || 'Польша';
-        const rate = v.rate || v.Stawka || v.stawka || v['Ставка (zł/год)'] || 'По договоренности';
-        const housing = v.housing || v.Zakwaterowanie || v.zakwaterowanie || v['Житло'] || '';
-        const desc = v.description || v.Opis || v.opis || v["Опис обов'язків"] || '';
+        const title = getProp(v, ['назв', 'nazwa', 'title', 'ваканс']) || 'Вакансия';
+        const city = getProp(v, ['міст', 'город', 'miasto', 'city']) || 'Польша';
+        const rate = getProp(v, ['ставк', 'stawka', 'rate']) || 'По договоренности';
+        const housing = getProp(v, ['житл', 'прожив', 'zakwaterowanie', 'housing']);
+        const desc = getProp(v, ['опис', 'описан', 'opis', 'desc', 'обов']);
 
         return `
           <div class="card" onclick="openDetails(${index})">
@@ -524,9 +541,9 @@
     function filterVacancies() {
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
       const filtered = allVacancies.filter(v => {
-        const title = (v.title || v.Nazwa || v['Назва вакансії'] || '').toLowerCase();
-        const city = (v.city || v.Miasto || v['Місто'] || '').toLowerCase();
-        const desc = (v.description || v.Opis || v.opis || v["Опис обов'язків"] || '').toLowerCase();
+        const title = getProp(v, ['назв', 'nazwa', 'title', 'ваканс']).toLowerCase();
+        const city = getProp(v, ['міст', 'город', 'miasto', 'city']).toLowerCase();
+        const desc = getProp(v, ['опис', 'описан', 'opis', 'desc', 'обов']).toLowerCase();
         return title.includes(query) || city.includes(query) || desc.includes(query);
       });
       renderVacancies(filtered);
@@ -535,13 +552,13 @@
     function openDetails(index) {
       const v = allVacancies[index];
       if (!v) return;
-      selectedVacancy = v.title || v.Nazwa || v['Назва вакансії'] || 'Вакансия';
+      selectedVacancy = getProp(v, ['назв', 'nazwa', 'title', 'ваканс']) || 'Вакансия';
       
       document.getElementById('detTitle').innerText = selectedVacancy;
-      document.getElementById('detCity').innerText = v.city || v.Miasto || v['Місто'] || 'Польша';
-      document.getElementById('detRate').innerText = v.rate || v.Stawka || v.stawka || v['Ставка (zł/год)'] || 'По договоренности';
+      document.getElementById('detCity').innerText = getProp(v, ['міст', 'город', 'miasto', 'city']) || 'Польша';
+      document.getElementById('detRate').innerText = getProp(v, ['ставк', 'stawka', 'rate']) || 'По договоренности';
       
-      const housing = v.housing || v.Zakwaterowanie || v.zakwaterowanie || v['Житло'] || '';
+      const housing = getProp(v, ['житл', 'прожив', 'zakwaterowanie', 'housing']);
       const housingBlock = document.getElementById('detHousingBlock');
       if (housing) {
         document.getElementById('detHousing').innerText = housing;
@@ -550,7 +567,7 @@
         housingBlock.style.display = 'none';
       }
 
-      document.getElementById('detDesc').innerText = v.description || v.Opis || v.opis || v["Опис обов'язків"] || 'Описание отсутствует.';
+      document.getElementById('detDesc').innerText = getProp(v, ['опис', 'описан', 'opis', 'desc', 'обов']) || 'Описание отсутствует.';
       document.getElementById('detailsModal').classList.add('active');
     }
 
@@ -623,6 +640,9 @@
     }
 
     loadVacancies();
+  </script>
+</body>
+</html>
   </script>
 </body>
 </html>
