@@ -1,352 +1,480 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kono Jobs • Робота в Польщі</title>
-    <style>
-        :root {
-            --bg-color: #f5f5f7;
-            --card-bg: #ffffff;
-            --text-main: #1d1d1f;
-            --text-secondary: #86868b;
-            --accent: #0071e3;
-            --border: #d2d2d7;
-            --radius: 14px;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 0;
-            -webkit-font-smoothing: antialiased;
-        }
-        header {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            border-bottom: 1px solid var(--border);
-            padding: 16px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        header h1 {
-            margin: 0;
-            font-size: 18px;
-            font-weight: 700;
-            letter-spacing: -0.3px;
-        }
-        header span {
-            font-size: 12px;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px 16px;
-        }
-        .search-box {
-            width: 100%;
-            padding: 12px 16px;
-            font-size: 15px;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            background: #fff;
-            margin-bottom: 20px;
-            box-sizing: border-box;
-            outline: none;
-        }
-        .search-box:focus {
-            border-color: var(--accent);
-        }
-        .card {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.04);
-            border: 1px solid rgba(0,0,0,0.02);
-        }
-        .card-title {
-            font-size: 17px;
-            font-weight: 600;
-            margin: 0 0 8px 0;
-            color: var(--text-main);
-        }
-        .tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-bottom: 12px;
-        }
-        .tag {
-            background: #f2f2f7;
-            color: #3a3a3c;
-            font-size: 11.5px;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-weight: 500;
-        }
-        .tag.salary {
-            background: #e1f5fe;
-            color: #0288d1;
-            font-weight: 600;
-        }
-        .card-desc {
-            font-size: 13.5px;
-            color: #515154;
-            line-height: 1.4;
-            margin-bottom: 16px;
-        }
-        .apply-btn {
-            background-color: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 18px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            transition: background 0.2s;
-        }
-        .apply-btn:hover {
-            background-color: #0077ed;
-        }
-        /* Модальне вікно */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(4px);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            padding: 16px;
-        }
-        .modal-content {
-            background: #fff;
-            width: 100%;
-            max-width: 400px;
-            border-radius: 16px;
-            padding: 24px;
-            box-sizing: border-box;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        }
-        .modal-content h3 {
-            margin-top: 0;
-            font-size: 18px;
-        }
-        .form-group {
-            margin-bottom: 14px;
-        }
-        .form-group label {
-            display: block;
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-bottom: 4px;
-            font-weight: 500;
-        }
-        .form-group input, .form-group textarea {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 14px;
-            box-sizing: border-box;
-        }
-        .form-group textarea {
-            resize: vertical;
-            height: 70px;
-        }
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .cancel-btn {
-            background: #e5e5ea;
-            color: #1d1d1f;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            flex: 1;
-        }
-        .submit-btn {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            flex: 1;
-        }
-        .loading, .error-msg {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-secondary);
-        }
-        .error-msg { color: #ff3b30; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Pavlo Jobs • Робота в Польщі</title>
+  <style>
+    :root {
+      --bg-color: #f5f5f7;
+      --card-bg: #ffffff;
+      --text-main: #1d1d1f;
+      --text-secondary: #86868b;
+      --accent: #0071e3;
+      --accent-hover: #0077ed;
+      --border: #d2d2d7;
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      margin: 0;
+      padding: 0;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+    }
+
+    .badge-header {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 20px 16px 60px;
+    }
+
+    .search-box {
+      position: relative;
+      margin-bottom: 24px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 13px 16px 13px 42px;
+      font-size: 16px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 14px;
+      background: var(--card-bg);
+      color: var(--text-main);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      pointer-events: none;
+    }
+
+    .vacancy-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      transition: transform 0.15s ease;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+
+    .card-rate {
+      background: #e8f3ff;
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 14px;
+      padding: 5px 10px;
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+
+    .card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .card-desc {
+      font-size: 15px;
+      color: #333336;
+      margin: 0 0 16px;
+      white-space: pre-line;
+    }
+
+    .apply-btn {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 13px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .apply-btn:active {
+      transform: scale(0.98);
+      background: var(--accent-hover);
+    }
+
+    .status-msg {
+      text-align: center;
+      padding: 40px 20px;
+      font-size: 16px;
+      color: var(--text-secondary);
+    }
+
+    .error-msg {
+      color: #ff3b30;
+    }
+
+    /* Modal (iOS Sheet Style) */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      display: none;
+      justify-content: center;
+      align-items: flex-end;
+      z-index: 200;
+    }
+
+    @media (min-width: 600px) {
+      .modal-overlay {
+        align-items: center;
+      }
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--card-bg);
+      width: 100%;
+      max-width: 460px;
+      border-radius: 22px 22px 0 0;
+      padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+      box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
+      animation: slideUp 0.25s ease-out;
+    }
+
+    @media (min-width: 600px) {
+      .modal {
+        border-radius: 20px;
+        padding: 26px;
+      }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(40px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .modal-title {
+      font-size: 19px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .close-btn {
+      background: #f2f2f7;
+      border: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      font-size: 18px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .selected-vacancy-label {
+      font-size: 14px;
+      color: var(--accent);
+      font-weight: 500;
+      margin-bottom: 16px;
+      background: #f0f7ff;
+      padding: 8px 12px;
+      border-radius: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fafafa;
+      color: var(--text-main);
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .form-control:focus {
+      background: #fff;
+      border-color: var(--accent);
+    }
+
+    .submit-btn {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  </style>
 </head>
 <body>
 
-    <header>
-        <h1>Kono Jobs • Вакансії</h1>
-        <span>Офіційне працевлаштування</span>
-    </header>
+  <header>
+    <div class="logo">Pavlo Jobs • Вакансії</div>
+    <div class="badge-header">Офіційне працевлаштування</div>
+  </header>
 
-    <div class="container">
-        <input type="text" id="searchInput" class="search-box" placeholder="🔍 Пошук за назвою або містом..." onkeyup="filterVacancies()">
-        <div id="vacanciesList">
-            <div class="loading">Завантаження актуальних вакансій...</div>
-        </div>
+  <div class="container">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" class="search-input" placeholder="Пошук за назвою або містом..." oninput="filterVacancies()">
     </div>
 
-    <!-- Модальне вікно відгуку -->
-    <div id="applyModal" class="modal">
-        <div class="modal-content">
-            <h3 id="modalTitle">Відгукнутися</h3>
-            <div class="form-group">
-                <label>Ваше ім'я та прізвище</label>
-                <input type="text" id="applicantName" placeholder="Андрій Шевченко">
-            </div>
-            <div class="form-group">
-                <label>Телефон / Telegram / Viber</label>
-                <input type="text" id="applicantPhone" placeholder="+48 123 456 789">
-            </div>
-            <div class="form-group">
-                <label>Коментар (необов'язково)</label>
-                <textarea id="applicantComment" placeholder="Коли готові вийти на роботу?"></textarea>
-            </div>
-            <div class="modal-buttons">
-                <button class="cancel-btn" onclick="closeModal()">Скасувати</button>
-                <button class="submit-btn" onclick="submitForm()">Відправити</button>
-            </div>
-        </div>
+    <div id="vacanciesContainer" class="vacancy-list">
+      <div class="status-msg">Завантаження актуальних вакансій...</div>
     </div>
+  </div>
 
-    <script>
-        // Вставте сюди ваше актуальне посилання на розгорнутий Apps Script (що закінчується на /exec)
-        const API_URL = 'https://script.google.com/macros/s/AKfycbyGfYowwhe5y3NVYt1m8L5WzSrdvoqWIzOAcb7-fElV6FR23f6buSKOYFH9lamfl3gCmg/exec';
+  <!-- Модальне вікно відгуку -->
+  <div id="applyModal" class="modal-overlay" onclick="closeModalOnOverlay(event)">
+    <div class="modal">
+      <div class="modal-top">
+        <h3 class="modal-title">Відгукнутися на вакансію</h3>
+        <button class="close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <div id="modalVacancyTitle" class="selected-vacancy-label"></div>
 
-        let allVacancies = [];
-        let selectedVacancy = '';
+      <div class="form-group">
+        <label for="applicantName">Ваше ім'я та прізвище *</label>
+        <input type="text" id="applicantName" class="form-control" placeholder="Наприклад: Олександр Коваль">
+      </div>
 
-        window.onload = function() {
-            fetchVacancies();
-        };
+      <div class="form-group">
+        <label for="applicantPhone">Телефон (Viber / Telegram) *</label>
+        <input type="tel" id="applicantPhone" class="form-control" placeholder="+48 000 000 000">
+      </div>
 
-        function fetchVacancies() {
-            // Запит до Google Таблиці через Apps Script Web App
-            fetch(API_URL)
-                .then(response => response.json())
-                .then(data => {
-                    allVacancies = data;
-                    renderVacancies(data);
-                })
-                .catch(err => {
-                    document.getElementById('vacanciesList').innerHTML = '<div class="error-msg">Не вдалося завантажити вакансії. Спробуйте пізніше.</div>';
-                });
-        }
+      <div class="form-group">
+        <label for="applicantComment">Коментар (вік, місто, документи)</label>
+        <textarea id="applicantComment" class="form-control" rows="3" placeholder="Наприклад: Вже в Польщі, готовий вийти з понеділка"></textarea>
+      </div>
 
-        function renderVacancies(vacancies) {
-            const listEl = document.getElementById('vacanciesList');
-            if (!vacancies || vacancies.length === 0) {
-                listEl.innerHTML = '<div class="loading">Актуальних вакансій наразі немає.</div>';
-                return;
-            }
+      <button class="submit-btn" onclick="submitForm()">Надіслати заявку</button>
+    </div>
+  </div>
 
-            let html = '';
-            vacancies.forEach(v => {
-                html += `
-                    <div class="card">
-                        <h2 class="card-title">${v.title}</h2>
-                        <div class="tags">
-                            <span class="tag">📍 ${v.city}</span>
-                            <span class="tag salary">💵 ${v.salary}</span>
-                            <span class="tag">🏠 ${v.housing}</span>
-                            <span class="tag">⏱ ${v.schedule}</span>
-                        </div>
-                        <div class="card-desc">${v.description}</div>
-                        <button class="apply-btn" onclick="openModal('${v.title}')">Відгукнутися на вакансію</button>
-                    </div>
-                `;
-            });
-            listEl.innerHTML = html;
-        }
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyGfYowwhe5y3NVYt1m8L5WzSrdvoqWIzOAcb7-fElV6FR23f6buSKOYFH9lamfl3gCmg/exec';
+    let allVacancies = [];
+    let selectedVacancy = '';
 
-        function filterVacancies() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allVacancies.filter(v => 
-                v.title.toLowerCase().includes(query) || 
-                v.city.toLowerCase().includes(query) ||
-                v.description.toLowerCase().includes(query)
-            );
-            renderVacancies(filtered);
-        }
+    async function loadVacancies() {
+      const container = document.getElementById('vacanciesContainer');
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error('Network error');
+        const data = await response.json();
+        allVacancies = Array.isArray(data) ? data : (data.vacancies || []);
+        renderVacancies(allVacancies);
+      } catch (error) {
+        console.error(error);
+        container.innerHTML = '<div class="status-msg error-msg">Не вдалося завантажити вакансії. Перевірте доступ до Google Apps Script або спробуйте пізніше.</div>';
+      }
+    }
 
-        function openModal(title) {
-            selectedVacancy = title;
-            document.getElementById('modalTitle').innerText = 'Відгук: ' + title;
-            document.getElementById('applyModal').style.display = 'flex';
-        }
+    function renderVacancies(list) {
+      const container = document.getElementById('vacanciesContainer');
+      if (!list || list.length === 0) {
+        container.innerHTML = '<div class="status-msg">Наразі активних вакансій не знайдено.</div>';
+        return;
+      }
 
-        function closeModal() {
-            document.getElementById('applyModal').style.display = 'none';
-            document.getElementById('applicantName').value = '';
-            document.getElementById('applicantPhone').value = '';
-            document.getElementById('applicantComment').value = '';
-        }
+      container.innerHTML = list.map(v => {
+        const title = v.title || v.Nazwa || 'Вакансія';
+        const city = v.city || v.Miasto || 'Польща';
+        const rate = v.rate || v.Stawka || '';
+        const housing = v.housing || v.Zakwaterowanie || '';
+        const desc = v.description || v.Opis || '';
+        const safeTitle = title.replace(/'/g, "\\'");
 
-        function submitForm() {
-            const name = document.getElementById('applicantName').value.trim();
-            const phone = document.getElementById('applicantPhone').value.trim();
-            const comment = document.getElementById('applicantComment').value.trim();
+        return `
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">${title}</h2>
+              ${rate ? `<span class="card-rate">${rate}</span>` : ''}
+            </div>
+            <div class="card-meta">
+              <span>📍 ${city}</span>
+              ${housing ? `<span>🏠 ${housing}</span>` : ''}
+            </div>
+            ${desc ? `<p class="card-desc">${desc}</p>` : ''}
+            <button class="apply-btn" onclick="openModal('${safeTitle}')">Подати заявку</button>
+          </div>
+        `;
+      }).join('');
+    }
 
-            if (!name || !phone) {
-                alert('Будь ласка, вкажіть ваші ім’я та контактний телефон!');
-                return;
-            }
+    function filterVacancies() {
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      const filtered = allVacancies.filter(v => {
+        const title = (v.title || v.Nazwa || '').toLowerCase();
+        const city = (v.city || v.Miasto || '').toLowerCase();
+        const desc = (v.description || v.Opis || '').toLowerCase();
+        return title.includes(query) || city.includes(query) || desc.includes(query);
+      });
+      renderVacancies(filtered);
+    }
 
-            const btn = document.querySelector('.submit-btn');
-            btn.innerText = 'Відправка...';
-            btn.disabled = true;
+    function openModal(title) {
+      selectedVacancy = title;
+      document.getElementById('modalVacancyTitle').innerText = 'Вакансія: ' + title;
+      document.getElementById('applyModal').classList.add('active');
+    }
 
-            // Відправка даних через POST-запит на Apps Script -> звідти в Telegram і в таблицю
-            fetch(API_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    vacancyTitle: selectedVacancy,
-                    name: name,
-                    phone: phone,
-                    comment: comment
-                })
-            })
-            .then(() => {
-                btn.innerText = 'Відправити';
-                btn.disabled = false;
-                alert('Дякуємо! Ваша заявка успішно надіслана рекрутеру.');
-                closeModal();
-            })
-            .catch(err => {
-                btn.innerText = 'Відправити';
-                btn.disabled = false;
-                alert('Помилка відправки. Спробуйте ще раз.');
-            });
-        }
-    </script>
+    function closeModal() {
+      document.getElementById('applyModal').classList.remove('active');
+    }
+
+    function closeModalOnOverlay(e) {
+      if (e.target.id === 'applyModal') closeModal();
+    }
+
+    function submitForm() {
+      const name = document.getElementById('applicantName').value.trim();
+      const phone = document.getElementById('applicantPhone').value.trim();
+      const comment = document.getElementById('applicantComment').value.trim();
+
+      if (!name || !phone) {
+        alert('Будь ласка, вкажіть ваше ім’я та контактний телефон!');
+        return;
+      }
+
+      const btn = document.querySelector('.submit-btn');
+      btn.innerText = 'Відправка...';
+      btn.disabled = true;
+
+      fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          vacancyTitle: selectedVacancy,
+          name: name,
+          phone: phone,
+          comment: comment
+        })
+      })
+      .then(() => {
+        alert('✅ Дякуємо! Ваша заявка успішно відправлена. Координатор зв’яжеться з вами найближчим часом.');
+        document.getElementById('applicantName').value = '';
+        document.getElementById('applicantPhone').value = '';
+        document.getElementById('applicantComment').value = '';
+        closeModal();
+      })
+      .catch(() => {
+        alert('Сталася помилка при відправці. Спробуйте ще раз.');
+      })
+      .finally(() => {
+        btn.innerText = 'Надіслати заявку';
+        btn.disabled = false;
+      });
+    }
+
+    loadVacancies();
+  </script>
 </body>
 </html>
