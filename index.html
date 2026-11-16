@@ -124,43 +124,25 @@
 
     <div class="tags" id="mTags"></div>
 
-    <!-- 1. О клиенте (Колонка C) -->
+    <!-- Колонка C -->
     <div class="info-block" id="mClientBlock">
-      <div class="info-label">О клиенте / заказчике</div>
+      <div class="info-label">О предприятии / клиенте</div>
       <div class="info-text" id="mClientDesc"></div>
     </div>
 
-    <!-- 2. Локация (Колонка D) -->
-    <div class="info-block" id="mCityBlock">
-      <div class="info-label">Локация / Адрес</div>
-      <div class="info-text" id="mCity"></div>
-    </div>
-
-    <!-- 3. Ставка (Колонка E) -->
-    <div class="info-block" id="mRateBlock">
-      <div class="info-label">Ставка</div>
-      <div class="info-text" id="mRate"></div>
-    </div>
-
-    <!-- 4. Проживание (Колонка F) -->
-    <div class="info-block" id="mHousingBlock">
-      <div class="info-label">Проживание</div>
-      <div class="info-text" id="mHousing"></div>
-    </div>
-
-    <!-- 5. График работы (Колонка G) -->
+    <!-- Колонка G -->
     <div class="info-block" id="mScheduleBlock">
       <div class="info-label">График работы</div>
       <div class="info-text" id="mSchedule"></div>
     </div>
 
-    <!-- 6. Обязанности (Колонка H) -->
+    <!-- Колонка H -->
     <div class="info-block" id="mDutiesBlock">
       <div class="info-label">Обязанности</div>
       <div class="info-text" id="mDuties"></div>
     </div>
 
-    <!-- 7. Требования (Колонка I) -->
+    <!-- Колонка I -->
     <div class="info-block" id="mReqBlock">
       <div class="info-label">Требования к кандидатам</div>
       <div class="info-text" id="mRequirements"></div>
@@ -247,11 +229,7 @@
     if (selectedVacancy.housing) tagsHtml += `<span class="tag">🏠 ${escapeHtml(selectedVacancy.housing)}</span>`;
     document.getElementById('mTags').innerHTML = tagsHtml;
 
-    // Заповнюємо та показуємо/ховаємо всі блоки на основі даних із таблиці
     toggleBlock('mClientBlock', 'mClientDesc', selectedVacancy.clientDesc);
-    toggleBlock('mCityBlock', 'mCity', selectedVacancy.city);
-    toggleBlock('mRateBlock', 'mRate', selectedVacancy.rate);
-    toggleBlock('mHousingBlock', 'mHousing', selectedVacancy.housing);
     toggleBlock('mScheduleBlock', 'mSchedule', selectedVacancy.schedule);
     toggleBlock('mDutiesBlock', 'mDuties', selectedVacancy.duties);
     toggleBlock('mReqBlock', 'mRequirements', selectedVacancy.requirements);
