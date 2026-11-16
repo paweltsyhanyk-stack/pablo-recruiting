@@ -125,7 +125,7 @@
     <div class="tags" id="mTags"></div>
 
     <div class="info-block" id="mClientBlock">
-      <div class="info-label">О клиенте / заказчике</div>
+      <div class="info-label">О предприятии</div>
       <div class="info-text" id="mClientDesc"></div>
     </div>
 
@@ -166,8 +166,7 @@
   async function loadVacancies() {
     const container = document.getElementById('vacanciesList');
     try {
-      // Додаємо унікальний параметр часу, щоб обійти будь-яке кешування
-      const res = await fetch(API_URL + '?t=' + Date.now());
+      const res = await fetch(API_URL + '?nocache=' + Date.now());
       allVacancies = await res.json();
       renderVacancies(allVacancies);
     } catch (e) {
@@ -181,7 +180,7 @@
       container.innerHTML = '<div class="loader">По вашему запросу вакансий не найдено.</div>';
       return;
     }
-    container.innerHTML = list.map((v, idx) => `
+    container.innerHTML = list.map(v => `
       <div class="card">
         <div class="card-top">
           <h3 class="vac-title">${escapeHtml(v.title)}</h3>
@@ -192,7 +191,7 @@
           ${v.housing ? `<span class="tag">🏠 Жилье: ${escapeHtml(v.housing)}</span>` : ''}
         </div>
         ${v.clientDesc ? `<div class="card-desc">${escapeHtml(v.clientDesc)}</div>` : ''}
-        <button class="btn" onclick="openModal(${idx})">Подробнее и откликнуться</button>
+        <button class="btn" onclick="openModalById('${escapeHtml(v.id)}')">Подробнее и откликнуться</button>
       </div>
     `).join('');
   }
@@ -207,15 +206,8 @@
     renderVacancies(filtered);
   }
 
-  function openModal(index) {
-    const q = document.getElementById('searchInput').value.toLowerCase().trim();
-    const currentList = q ? allVacancies.filter(v => 
-      (v.title && v.title.toLowerCase().includes(q)) ||
-      (v.city && v.city.toLowerCase().includes(q)) ||
-      (v.duties && v.duties.toLowerCase().includes(q))
-    ) : allVacancies;
-    
-    selectedVacancy = currentList[index];
+  function openModalById(id) {
+    selectedVacancy = allVacancies.find(v => v.id === id);
     if (!selectedVacancy) return;
 
     document.getElementById('mTitle').innerText = selectedVacancy.title;
@@ -226,7 +218,6 @@
     if (selectedVacancy.housing) tagsHtml += `<span class="tag">🏠 ${escapeHtml(selectedVacancy.housing)}</span>`;
     document.getElementById('mTags').innerHTML = tagsHtml;
 
-    // Чітке розділення: clientDesc -> mClientDesc, duties -> mDuties
     toggleBlock('mClientBlock', 'mClientDesc', selectedVacancy.clientDesc);
     toggleBlock('mScheduleBlock', 'mSchedule', selectedVacancy.schedule);
     toggleBlock('mDutiesBlock', 'mDuties', selectedVacancy.duties);
