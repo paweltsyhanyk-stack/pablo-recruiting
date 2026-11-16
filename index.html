@@ -84,6 +84,7 @@
     .close-btn {
       position: sticky; top: 0; float: right; width: 32px; height: 32px;
       border-radius: 50%; border: none; background: var(--pill-bg); font-size: 18px; cursor: pointer; color: var(--subtext);
+      z-index: 10;
     }
     .modal-title { font-size: 20px; font-weight: 700; margin: 0 36px 16px 0; white-space: pre-line; }
     .info-block { background: #f9f9fb; border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; }
@@ -123,25 +124,43 @@
 
     <div class="tags" id="mTags"></div>
 
-    <!-- Блок опису підприємства (Колонка C) -->
+    <!-- 1. О клиенте (Колонка C) -->
     <div class="info-block" id="mClientBlock">
-      <div class="info-label">О предприятии</div>
+      <div class="info-label">О клиенте / заказчике</div>
       <div class="info-text" id="mClientDesc"></div>
     </div>
 
-    <!-- Блок графіку роботи -->
+    <!-- 2. Локация (Колонка D) -->
+    <div class="info-block" id="mCityBlock">
+      <div class="info-label">Локация / Адрес</div>
+      <div class="info-text" id="mCity"></div>
+    </div>
+
+    <!-- 3. Ставка (Колонка E) -->
+    <div class="info-block" id="mRateBlock">
+      <div class="info-label">Ставка</div>
+      <div class="info-text" id="mRate"></div>
+    </div>
+
+    <!-- 4. Проживание (Колонка F) -->
+    <div class="info-block" id="mHousingBlock">
+      <div class="info-label">Проживание</div>
+      <div class="info-text" id="mHousing"></div>
+    </div>
+
+    <!-- 5. График работы (Колонка G) -->
     <div class="info-block" id="mScheduleBlock">
       <div class="info-label">График работы</div>
       <div class="info-text" id="mSchedule"></div>
     </div>
 
-    <!-- Блок обов'язків (Колонка H) -->
+    <!-- 6. Обязанности (Колонка H) -->
     <div class="info-block" id="mDutiesBlock">
       <div class="info-label">Обязанности</div>
       <div class="info-text" id="mDuties"></div>
     </div>
 
-    <!-- Блок вимог -->
+    <!-- 7. Требования (Колонка I) -->
     <div class="info-block" id="mReqBlock">
       <div class="info-label">Требования к кандидатам</div>
       <div class="info-text" id="mRequirements"></div>
@@ -228,7 +247,11 @@
     if (selectedVacancy.housing) tagsHtml += `<span class="tag">🏠 ${escapeHtml(selectedVacancy.housing)}</span>`;
     document.getElementById('mTags').innerHTML = tagsHtml;
 
+    // Заповнюємо та показуємо/ховаємо всі блоки на основі даних із таблиці
     toggleBlock('mClientBlock', 'mClientDesc', selectedVacancy.clientDesc);
+    toggleBlock('mCityBlock', 'mCity', selectedVacancy.city);
+    toggleBlock('mRateBlock', 'mRate', selectedVacancy.rate);
+    toggleBlock('mHousingBlock', 'mHousing', selectedVacancy.housing);
     toggleBlock('mScheduleBlock', 'mSchedule', selectedVacancy.schedule);
     toggleBlock('mDutiesBlock', 'mDuties', selectedVacancy.duties);
     toggleBlock('mReqBlock', 'mRequirements', selectedVacancy.requirements);
@@ -245,7 +268,7 @@
 
   function toggleBlock(blockId, textId, value) {
     const block = document.getElementById(blockId);
-    if (value) {
+    if (value && value.trim() !== '') {
       block.style.display = 'block';
       document.getElementById(textId).innerText = value;
     } else {
