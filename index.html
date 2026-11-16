@@ -124,25 +124,21 @@
 
     <div class="tags" id="mTags"></div>
 
-    <!-- Колонка C -->
     <div class="info-block" id="mClientBlock">
-      <div class="info-label">О предприятии / клиенте</div>
+      <div class="info-label">О клиенте / заказчике</div>
       <div class="info-text" id="mClientDesc"></div>
     </div>
 
-    <!-- Колонка G -->
     <div class="info-block" id="mScheduleBlock">
       <div class="info-label">График работы</div>
       <div class="info-text" id="mSchedule"></div>
     </div>
 
-    <!-- Колонка H -->
     <div class="info-block" id="mDutiesBlock">
       <div class="info-label">Обязанности</div>
       <div class="info-text" id="mDuties"></div>
     </div>
 
-    <!-- Колонка I -->
     <div class="info-block" id="mReqBlock">
       <div class="info-label">Требования к кандидатам</div>
       <div class="info-text" id="mRequirements"></div>
@@ -170,7 +166,8 @@
   async function loadVacancies() {
     const container = document.getElementById('vacanciesList');
     try {
-      const res = await fetch(API_URL);
+      // Додаємо унікальний параметр часу, щоб обійти будь-яке кешування
+      const res = await fetch(API_URL + '?t=' + Date.now());
       allVacancies = await res.json();
       renderVacancies(allVacancies);
     } catch (e) {
@@ -229,6 +226,7 @@
     if (selectedVacancy.housing) tagsHtml += `<span class="tag">🏠 ${escapeHtml(selectedVacancy.housing)}</span>`;
     document.getElementById('mTags').innerHTML = tagsHtml;
 
+    // Чітке розділення: clientDesc -> mClientDesc, duties -> mDuties
     toggleBlock('mClientBlock', 'mClientDesc', selectedVacancy.clientDesc);
     toggleBlock('mScheduleBlock', 'mSchedule', selectedVacancy.schedule);
     toggleBlock('mDutiesBlock', 'mDuties', selectedVacancy.duties);
@@ -246,7 +244,7 @@
 
   function toggleBlock(blockId, textId, value) {
     const block = document.getElementById(blockId);
-    if (value && value.trim() !== '') {
+    if (value && String(value).trim() !== '') {
       block.style.display = 'block';
       document.getElementById(textId).innerText = value;
     } else {
@@ -313,7 +311,7 @@
 
   function escapeHtml(str) {
     if (!str) return '';
-    return str.replace(/[&<>"']/g, m => ({
+    return String(str).replace(/[&<>"']/g, m => ({
       '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
     }[m]));
   }
